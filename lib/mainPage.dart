@@ -1,124 +1,76 @@
 import 'package:flutter/material.dart';
+import 'home_page.dart';
+import 'search_page.dart';
+import 'profil.dart';
 
-class ProfilPage extends StatelessWidget {
-  const ProfilPage({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _selectedIndex = 0;
+
+  // List of pages
+  final List<Widget> _pages = [
+    const HomePage(),
+    FindDonorPage(),
+    Container(), // Placeholder pour le bouton "+"
+    Container(), // Placeholder pour notifications
+    const ProfilPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    // Si c'est le bouton central "+" on peut ouvrir un modal ou page
+    if (index == 2) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Action"),
+          content: const Text("Vous avez appuyé sur +"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Fermer"),
+            ),
+          ],
+        ),
+      );
+      return; // Ne change pas la page
+    }
+
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Profile",
-          style: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        centerTitle: false, // <-- Aligne le titre à gauche
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 60),
-                    width: 330,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 60),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(
-                              "Full Name",
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            Icon(Icons.edit, color: Colors.white, size: 18),
-                          ],
-                        ),
-                        const Text(
-                          "Sarah Benali",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text("Sexe", style: TextStyle(color: Colors.white70)),
-                            Text("Birth Date", style: TextStyle(color: Colors.white70)),
-                          ],
-                        ),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Female", style: TextStyle(color: Colors.white)),
-                            Text("22/08/2003", style: TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        const Text("Email", style: TextStyle(color: Colors.white70)),
-                        const Text(
-                          "Sarah.benali@gmail.com",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text("Phone Number", style: TextStyle(color: Colors.white70)),
-                        const Text("05XX XX XX XX", style: TextStyle(color: Colors.white)),
-                        const SizedBox(height: 10),
-                        const Text("Address", style: TextStyle(color: Colors.white70)),
-                        const Text("Algiers, Algeria", style: TextStyle(color: Colors.white)),
-                        const SizedBox(height: 10),
-                        const Text("Blood Type", style: TextStyle(color: Colors.white70)),
-                        const Text("A+", style: TextStyle(color: Colors.white)),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Status",
-                                style: TextStyle(color: Colors.white70)),
-                            Row(
-                              children: [
-                                const Text("Available",
-                                    style: TextStyle(color: Colors.white)),
-                                Switch(
-                                  value: true,
-                                  onChanged: (val) {},
-                                  activeColor: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const CircleAvatar(
-                    radius: 45,
-                    backgroundImage: AssetImage('assets/profile.jpg'),
-                  ),
-                ],
-              ),
-            ],
+      body: _pages[_selectedIndex], // Affiche la page sélectionnée
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex > 2 ? _selectedIndex : _selectedIndex,
+        selectedItemColor: Colors.red,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+            label: '',
           ),
-        ),
+          const BottomNavigationBarItem(
+              icon: Icon(Icons.notifications), label: 'Alerts'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
