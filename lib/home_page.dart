@@ -86,7 +86,7 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 0),
 
-            // Section Donators
+            /// Section Donators
             Container(
               margin: const EdgeInsets.symmetric(vertical: 30),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -150,49 +150,81 @@ class DonatorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Image.asset(
-          imageAsset,
-          width: 48.0,
-          height: 48.0,
-          fit: BoxFit.cover,
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1EEEE),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: const Color(0xFFECE8E8),
+          width: 2.0,
         ),
-        SizedBox(width: 16.0),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 4.0),
-              Text(
-                location,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                ),
-              ),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFAFAEAE),
+            blurRadius: 3,
+            offset: const Offset(0, 5),
           ),
-        ),
-        Text(
-          bloodType,
-          style: const TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.bold,
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: Image.asset(
+              imageAsset,
+              width: 48.0,
+              height: 48.0,
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-      ],
+          SizedBox(width: 16.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4.0),
+                Text(
+                  location,
+                  style: const TextStyle(
+                    fontSize: 14.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB31111),
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                color: const Color(0xFFE5C5C5),
+                width: 2.0,
+              ),
+            ),
+            child: Text(
+              bloodType,
+              style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFE5C5C5),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
 // 🔸 Widget personnalisé pour les boutons Request / Donate
 class RequestButton extends StatelessWidget {
   final String title;
