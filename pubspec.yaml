@@ -1,4 +1,4 @@
-name: donat_algeria
+name: Donnation
 description: Mon premier projet Flutter
 publish_to: "none"
 version: 1.0.0+1
@@ -26,4 +26,7 @@ flutter:
     - assets/donate.png
     - assets/request.png
     - assets/slider1.png
+    - assets/sara.png
+    - assets/amine.png
+    - assets/mohamed.png
 

@@ -86,33 +86,109 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 0),
 
-            //  Section Donators
+            // Section Donators
             Container(
               margin: const EdgeInsets.symmetric(vertical: 30),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
               ),
-              child: const Text(
-                "Top Donators",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Top Donators",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  DonatorItem(
+                    name: 'Ms.Sara',
+                    location: 'Maghnia, Tlemcen',
+                    bloodType: 'B+',
+                    imageAsset: 'assets/sara.png',
+                  ),
+                  const SizedBox(height: 16.0),
+                  DonatorItem(
+                    name: 'Mr.amine',
+                    location: 'Birkhadem, Alger',
+                    bloodType: 'O-',
+                    imageAsset: 'assets/amine.png',
+                  ),
+                  const SizedBox(height: 16.0),
+                  DonatorItem(
+                    name: 'Mr.Mohammed',
+                    location: 'El Khroub, Constantine',
+                    bloodType: 'A+',
+                    imageAsset: 'assets/mohamed.png',
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 0),
-            const Text(
-              "No donators yet",
-              style: TextStyle(fontSize: 16, color: Colors.black54),
-            ),
-            const SizedBox(height: 10),
           ],
         ),
       ),
+    );
+  }
+}
+
+class DonatorItem extends StatelessWidget {
+  final String name;
+  final String location;
+  final String bloodType;
+  final String imageAsset;
+
+  DonatorItem({
+    required this.name,
+    required this.location,
+    required this.bloodType,
+    required this.imageAsset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Image.asset(
+          imageAsset,
+          width: 48.0,
+          height: 48.0,
+          fit: BoxFit.cover,
+        ),
+        SizedBox(width: 16.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4.0),
+              Text(
+                location,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          bloodType,
+          style: const TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

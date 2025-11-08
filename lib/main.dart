@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'home_page.dart'; // la page d’accueil
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -45,8 +44,8 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Image.asset(
           'assets/logo1.png',
-          width: 450,
-          height: 450,
+          width: 200,
+          height: 200,
           fit: BoxFit.contain,
         ),
       ),
