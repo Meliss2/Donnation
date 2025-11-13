@@ -77,6 +77,7 @@ class HomePage extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => FindDonorPage(),
                         ),
+
                       );
                     },
                   ),
@@ -103,6 +104,7 @@ class HomePage extends StatelessWidget {
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
+
                   ),
                   const SizedBox(height: 16.0),
                   DonatorItem(
