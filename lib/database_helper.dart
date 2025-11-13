@@ -109,6 +109,38 @@ class DatabaseHelper {
       whereArgs: [userId],
     );
   }
+//-----------------search donors----------
+  Future<List<Map<String, dynamic>>> searchUsers(String query) async {
+    final db = await instance.database;
+
+    if (query.isEmpty) {
+      // Si la barre de recherche est vide → renvoie tous les enregistrements
+      return await db.query('users');
+    }
+
+    // Rechercher dans plusieurs colonnes
+    return await db.query(
+      'users',
+      where: '''
+      name LIKE ? OR
+      age LIKE ? OR
+      gender LIKE ? OR
+      needType LIKE ? OR
+      bloodGroup LIKE ? OR
+      phone LIKE ? OR
+      location LIKE ?
+    ''',
+      whereArgs: [
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%'
+      ],
+    );
+  }
 
 
   // ---------------- Close DB ----------------
