@@ -1,5 +1,6 @@
 import 'mainPage.dart';
 import 'package:flutter/material.dart';
+import 'profil_donor.dart';
 
 class FindDonorPage extends StatelessWidget {
   final List<Map<String, String>> donors = [
@@ -7,31 +8,36 @@ class FindDonorPage extends StatelessWidget {
       'name': 'Sarah Benali',
       'location': 'Algiers, Algeria',
       'blood': 'A+',
-      'image': 'assets/profile.png'
+      'image': 'assets/profile.png',
+      'phone': '+213661112233'
     },
     {
       'name': 'Yucef Rezgui',
       'location': 'Tizi Ouzou, Algeria',
       'blood': 'B+',
-      'image': 'assets/yucef.png'
+      'image': 'assets/yucef.png',
+      'phone': '+213661112233'
     },
     {
       'name': 'Ramy Ghoumari',
       'location': 'Medea, Algeria',
       'blood': 'A-',
-      'image': 'assets/ramy.png'
+      'image': 'assets/ramy.png',
+      'phone': '+213661112233'
     },
     {
       'name': 'Mahdi Cheurfa',
       'location': 'Bejaia, Algeria',
       'blood': 'AB+',
-      'image': 'assets/amine.png'
+      'image': 'assets/amine.png',
+      'phone': '+213661112233'
     },
     {
       'name': 'Islam Benali',
       'location': 'Algiers, Algeria',
       'blood': 'O+',
-      'image': 'assets/mohamed.png'
+      'image': 'assets/mohamed.png',
+      'phone': '+213661112233'
     },
   ];
 
@@ -42,23 +48,19 @@ class FindDonorPage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // On revient à la page d'accueil
-            // Il faut passer par MainPage
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const MainPage()),
             );
           },
         ),
-
-
-        title: const Text( //titre de la page
+        title: const Text(
           'Find Donor/Receiver',
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton( //icone de filtre
+          IconButton(
             icon: Icon(Icons.filter_list, color: Colors.red),
             onPressed: () {},
           ),
@@ -68,7 +70,6 @@ class FindDonorPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // 🔍 Barre de recherche
             TextField(
               decoration: InputDecoration(
                 hintText: 'Search a Donator...',
@@ -105,11 +106,24 @@ class FindDonorPage extends StatelessWidget {
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      subtitle: Row(
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.location_on, size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(donor['location']!),
+                          Row(
+                            children: [
+                              Icon(Icons.location_on, size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(donor['location']!),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(Icons.phone, size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(donor['phone'] ?? 'N/A'),
+                            ],
+                          ),
                         ],
                       ),
                       trailing: Container(
@@ -127,6 +141,15 @@ class FindDonorPage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (_) => DonorProfileSheet(donor: donor),
+                        );
+                      },
                     ),
                   );
                 },
