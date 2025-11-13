@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'mainPage.dart';
+import 'login_page.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -29,11 +31,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // 3 secondes avant de passer à la HomePage
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const MainPage()));
-    });
+    _navigateToMainPage();
+  }
+
+  Future<void> _navigateToMainPage() async {
+    await Future.delayed(const Duration(seconds: 3)); // Attendre 3 secondes
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainPage()),
+    );
   }
 
   @override

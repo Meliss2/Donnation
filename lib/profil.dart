@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'MainPage.dart';
+import 'login_page.dart';
 class ProfilPage extends StatelessWidget {
   const ProfilPage({super.key});
 
@@ -112,11 +113,21 @@ class ProfilPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const CircleAvatar(
-                    radius: 45,
-                    child: Icon(Icons.person, size: 45),
-                  )
-                  ,
+        GestureDetector(
+          onTap: () {
+            // Naviguer vers la page de connexion
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+            );
+          },
+          child: const CircleAvatar(
+            radius: 45,
+            child: Icon(Icons.person, size: 45),
+          ),
+        ),
+
+
                 ],
               ),
             ],

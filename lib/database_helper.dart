@@ -58,7 +58,23 @@ Future<List<Map<String, dynamic>>> getNotifications(int receiverId) async {
     orderBy: 'id DESC',
   );
 }
-
+  Future<Map<String, dynamic>?> getCurrentUser(String email, String password) async {
+    final db = await instance.database;
+    final result = await db.query('users', where: 'isLoggedIn = ?', whereArgs: [1]);
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+  Future<void> markUserAsLoggedIn(int id) async {
+    final db = await instance.database;
+    await db.update(
+      'users',
+      {'isLoggedIn': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 Future close() async {
   final db = await instance.database;
   db.close();
