@@ -28,15 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = true);
 
     final db = DatabaseHelper.instance;
-
-    // Vérifier si l'utilisateur existe
-    final user = await db.getCurrentUser(
-      //emailController.text.trim(),
-      //passwordController.text.trim(),
-    );
-
     final user = await db.getCurrentUser(email, password);
-
 
     setState(() => isLoading = false);
 
