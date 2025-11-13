@@ -15,30 +15,38 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   Future<void> login() async {
-    setState(() {
-      isLoading = true;
-    });
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir tous les champs')),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
 
     final db = DatabaseHelper.instance;
+
     // Vérifier si l'utilisateur existe
     final user = await db.getCurrentUser(
       //emailController.text.trim(),
       //passwordController.text.trim(),
     );
 
-    setState(() {
-      isLoading = false;
-    });
+    final user = await db.getCurrentUser(email, password);
+
+
+    setState(() => isLoading = false);
 
     if (user != null) {
-      // Marquer l'utilisateur comme connecté
       await db.markUserAsLoggedIn(user['id']);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MainPage()),
       );
     } else {
-      // Afficher un message d'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Email ou mot de passe incorrect'),
@@ -47,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

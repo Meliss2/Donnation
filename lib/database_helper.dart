@@ -84,24 +84,64 @@ class DatabaseHelper {
   }
 
   // ---------------- Méthodes Users ----------------
-  Future<Map<String, dynamic>?> getCurrentUser() async {
+  Future<Map<String, dynamic>?> getCurrentUser(String email, String password) async {
     final db = await instance.database;
-    final result = await db.query('users', where: 'isLoggedIn = ?', whereArgs: [1]);
+
+    final result = await db.query(
+      'users',
+      where: 'email = ? AND password = ?',
+      whereArgs: [email, password],
+    );
+
     if (result.isNotEmpty) {
       return result.first;
     }
     return null;
   }
 
-  Future<void> markUserAsLoggedIn(int id) async {
+  /// Marquer un utilisateur comme connecté
+  Future<void> markUserAsLoggedIn(int userId) async {
     final db = await instance.database;
     await db.update(
       'users',
       {'isLoggedIn': 1},
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [userId],
     );
   }
+//-----------------search donors----------
+  Future<List<Map<String, dynamic>>> searchUsers(String query) async {
+    final db = await instance.database;
+
+    if (query.isEmpty) {
+      // Si la barre de recherche est vide → renvoie tous les enregistrements
+      return await db.query('users');
+    }
+
+    // Rechercher dans plusieurs colonnes
+    return await db.query(
+      'users',
+      where: '''
+      name LIKE ? OR
+      age LIKE ? OR
+      gender LIKE ? OR
+      needType LIKE ? OR
+      bloodGroup LIKE ? OR
+      phone LIKE ? OR
+      location LIKE ?
+    ''',
+      whereArgs: [
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%',
+        '%$query%'
+      ],
+    );
+  }
+
 
   // ---------------- Close DB ----------------
   Future close() async {

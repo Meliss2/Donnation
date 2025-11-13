@@ -1,8 +1,15 @@
 import 'mainPage.dart';
 import 'package:flutter/material.dart';
 import 'profil_donor.dart';
+import 'package:Donnation/database_helper.dart';
 
-class FindDonorPage extends StatelessWidget {
+
+class FindDonorPage extends StatefulWidget {
+  const FindDonorPage({super.key});
+
+  @override
+  State<FindDonorPage> createState() => _FindDonorPageState();
+}
   final List<Map<String, String>> donors = [
     {
       'name': 'Sarah Benali',
@@ -40,6 +47,23 @@ class FindDonorPage extends StatelessWidget {
       'phone': '+213661112233'
     },
   ];
+class _FindDonorPageState extends State<FindDonorPage> {
+  final TextEditingController searchController = TextEditingController();
+  List<Map<String, dynamic>> searchResults = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _search(); // Charger la liste au démarrage
+  }
+
+  Future<void> _search() async {
+    final query = searchController.text.trim();
+    final results = await DatabaseHelper.instance.searchUsers(query);
+    setState(() {
+      searchResults = results;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
