@@ -84,24 +84,32 @@ class DatabaseHelper {
   }
 
   // ---------------- Méthodes Users ----------------
-  Future<Map<String, dynamic>?> getCurrentUser() async {
+  Future<Map<String, dynamic>?> getCurrentUser(String email, String password) async {
     final db = await instance.database;
-    final result = await db.query('users', where: 'isLoggedIn = ?', whereArgs: [1]);
+
+    final result = await db.query(
+      'users',
+      where: 'email = ? AND password = ?',
+      whereArgs: [email, password],
+    );
+
     if (result.isNotEmpty) {
       return result.first;
     }
     return null;
   }
 
-  Future<void> markUserAsLoggedIn(int id) async {
+  /// Marquer un utilisateur comme connecté
+  Future<void> markUserAsLoggedIn(int userId) async {
     final db = await instance.database;
     await db.update(
       'users',
       {'isLoggedIn': 1},
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [userId],
     );
   }
+
 
   // ---------------- Close DB ----------------
   Future close() async {
