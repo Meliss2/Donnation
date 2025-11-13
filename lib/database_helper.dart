@@ -19,12 +19,17 @@ class DatabaseHelper {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  Future _createDB(Database db, int version) async {
+   Future _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE requests(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        bloodGroup TEXT NOT NULL
+        age TEXT NOT NULL,
+        gender TEXT NOT NULL,
+        needType TEXT NOT NULL,
+        bloodGroup TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        location TEXT NOT NULL
       )
     ''');
   }
