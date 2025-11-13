@@ -16,7 +16,7 @@ class FindDonorPage extends StatefulWidget {
       'location': 'Algiers, Algeria',
       'blood': 'A+',
       'image': 'assets/profile.png',
-      'phone': '+213661112233'
+      'phone': '0661112233'
     },
     {
       'name': 'Yucef Rezgui',

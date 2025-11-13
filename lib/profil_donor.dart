@@ -3,22 +3,29 @@ import 'package:url_launcher/url_launcher.dart';
 import 'notifications.dart';
 
 class DonorProfileSheet extends StatelessWidget {
-  final Map<String, dynamic> donor; // Infos dynamiques du donneur
+  final Map<String, dynamic> donor;
 
   const DonorProfileSheet({Key? key, required this.donor}) : super(key: key);
 
-  // 🔹 Fonction pour passer un appel avec vérification
-  Future<void> _makePhoneCall(String phoneNumber) async {
+  Future<void> _makePhoneCall(BuildContext context, String phoneNumber) async {
     if (phoneNumber.isEmpty || phoneNumber == "0") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ Numéro invalide')),
+      );
       debugPrint('❌ Numéro invalide');
       return;
     }
 
     final Uri callUri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(callUri)) {
+
+    try {
       await launchUrl(callUri);
-    } else {
-      debugPrint("❌ Impossible de lancer l'appel vers $phoneNumber");
+      debugPrint('📞 Lancement de l\'appel vers $phoneNumber');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Impossible de lancer l’appel vers $phoneNumber')),
+      );
+      debugPrint('❌ Impossible de lancer l\'appel vers $phoneNumber: $e');
     }
   }
 
@@ -72,30 +79,29 @@ class DonorProfileSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              // Bouton Call
               ElevatedButton.icon(
                 onPressed: () {
-                  // 📞 Lancer l'appel
                   final phone = donor['phone'] ?? '0';
-                  _makePhoneCall(phone);
+                  _makePhoneCall(context, phone); // ← Appel direct via téléphone
                 },
                 icon: const Icon(Icons.call),
                 label: const Text('Call Now'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
               ),
+
+              // Bouton Request
               ElevatedButton.icon(
                 icon: const Icon(Icons.bloodtype),
                 label: const Text('Request'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
                 onPressed: () {
-                  // 🔔 Ferme le modal et va à la page Notifications
                   Navigator.pop(context);
                   Navigator.push(
                     context,
