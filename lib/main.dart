@@ -1,9 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'mainPage.dart';
-import 'login_page.dart';
+import 'package:path/path.dart' as p; // alias pour éviter le conflit
+import 'package:sqflite/sqflite.dart';
 
-void main() {
+// Fonction pour supprimer la DB
+Future<void> resetDatabase() async {
+  WidgetsFlutterBinding.ensureInitialized(); // garantit l'initialisation avant DB
+  final dbPath = await getDatabasesPath();
+  final dbFile = p.join(dbPath, 'donnation.db');
+  await deleteDatabase(dbFile);
+  print('✅ Database deleted: $dbFile');
+}
+
+void main() async {
+  //await resetDatabase();
   runApp(const MyApp());
 }
 
@@ -35,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToMainPage() async {
-    await Future.delayed(const Duration(seconds: 3)); // Attendre 3 secondes
+    await Future.delayed(const Duration(seconds: 3));
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const MainPage()),

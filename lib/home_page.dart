@@ -3,9 +3,11 @@ import 'search_page.dart';
 import 'post_a_request.dart';
 // 🔹 Widget principal : HomePage
 class HomePage extends StatelessWidget {
-  final void Function(int)? onNavigate; // ← Ajouter ce paramètre
+  final Map<String, dynamic>? userData; // ← ajouter ce paramètre
+  final void Function(int)? onNavigate;
 
-  const HomePage({super.key, this.onNavigate});
+  const HomePage({super.key, this.userData, this.onNavigate});
+
 
 
   @override

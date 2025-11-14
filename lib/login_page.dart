@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Donnation/database_helper.dart';
 import 'mainPage.dart';
+import 'SignUp.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -48,7 +49,13 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
+  // Méthode pour naviguer vers la page d'inscription
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUpPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +120,14 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 const Text("Don't have an account? "),
                 TextButton(
-                  onPressed: () {},
-                  child: const Text('Sign Up'),
+                  onPressed: _navigateToSignUp, // Lien vers la page d'inscription
+                  child: const Text(
+                    'Sign Up',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),

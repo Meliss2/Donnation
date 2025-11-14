@@ -1,5 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:convert';       // for utf8
+import 'package:crypto/crypto.dart'; // for sha256
+
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -22,6 +25,7 @@ class DatabaseHelper {
       onCreate: _createDB,
     );
   }
+
 
   Future _createDB(Database db, int version) async {
     // Table requests
@@ -57,14 +61,81 @@ class DatabaseHelper {
 
     // Table users (optionnelle, si tu veux gérer login)
     await db.execute('''
-      CREATE TABLE users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
-        password TEXT NOT NULL,
-        isLoggedIn INTEGER DEFAULT 0
-      )
+CREATE TABLE users(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  fullName TEXT NOT NULL,
+  gender TEXT NOT NULL,
+  birthDate TEXT NOT NULL,
+  bloodGroup TEXT NOT NULL,
+  address TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  phone TEXT NOT NULL,
+  password TEXT NOT NULL,
+  healthCondition TEXT NOT NULL,
+  isLoggedIn INTEGER DEFAULT 0
+)
     ''');
   }
+
+// ---------------- Méthodes Sign Up ----------------
+
+  // Hash du mot de passe
+  String hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  // Vérifier si l'email existe déjà
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    if (result.isNotEmpty) return result.first;
+    return null;
+  }
+
+  // Insérer un nouvel utilisateur
+  Future<int> insertUser(Map<String, dynamic> userData) async {
+    final db = await instance.database;
+
+    // Hasher le mot de passe avant insertion
+    userData['password'] = hashPassword(userData['password']);
+
+    return await db.insert('users', userData);
+  }
+
+  // Sign Up principal
+  Future<Map<String, dynamic>> signUp(Map<String, dynamic> userData) async {
+    try {
+      // Vérifier si l'email existe
+      final existingUser = await getUserByEmail(userData['email']);
+      if (existingUser != null) {
+        return {
+          'success': false,
+          'message': 'Cet email est déjà utilisé',
+        };
+      }
+
+      // Insérer l'utilisateur
+      final userId = await insertUser(userData);
+
+      return {
+        'success': true,
+        'message': 'Inscription réussie',
+        'userId': userId,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Erreur lors de l\'inscription: $e',
+      };
+    }
+  }
+
 
   // ---------------- Méthodes Requests ----------------
   Future<int> insertRequest(Map<String, dynamic> row) async {
