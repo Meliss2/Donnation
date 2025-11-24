@@ -204,7 +204,7 @@ class _PostRequestFormState extends State<PostRequestForm> {
 
             const Text("Location *"),
             DropdownButtonFormField<String>(
-              value: selectedCommune,
+              initialValue: selectedCommune,
               hint: const Text("Select a Location"),
               items: communes.map((commune) {
                 return DropdownMenuItem(
@@ -243,7 +243,7 @@ class _PostRequestFormState extends State<PostRequestForm> {
 
                   // Créer la requête
                   final request = {
-                    'user_id': widget.userData?['id'],
+                    'userId': widget.userData?['id'],
                     'name': nameCtrl.text.trim(),
                     'age': selectedAge,
                     'gender': selectedGender,

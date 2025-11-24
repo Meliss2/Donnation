@@ -42,13 +42,14 @@ class _HomePageState extends State<HomePage> {
 
     final req = await database.query(
       "requests",// Les récents en premier
+      orderBy: "date DESC",
     );
 
-    final usrs = await db.getAllUsers();
+    final usersList = await db.getAllUsers();
 
     setState(() {
       requests = req;
-      users = usrs;
+      users = usersList;
     });
   }
   String getUserName(Map<String, dynamic> request) {
