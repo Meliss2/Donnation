@@ -97,7 +97,7 @@ class _FindDonorPageState extends State<FindDonorPage> {
             if (isLoading)
               const Center(child: CircularProgressIndicator())
             else if (searchResults.isEmpty)
-              const Center(child: Text('Aucun donneur trouvé'))
+              const Center(child: Text('No donor found'))
             else
               Expanded(
                 child: ListView.builder(

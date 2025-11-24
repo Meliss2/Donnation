@@ -263,7 +263,7 @@ class _PostRequestFormState extends State<PostRequestForm> {
 
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
+                    MaterialPageRoute(builder: (context) => const MainPage()),
                   );
                 },
                 child: const Text("Publish", style: TextStyle(fontSize: 18)),

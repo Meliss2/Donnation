@@ -2,7 +2,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -39,7 +38,8 @@ class DatabaseHelper {
         needType TEXT NOT NULL,
         bloodGroup TEXT NOT NULL,
         phone TEXT NOT NULL,
-        location TEXT NOT NULL
+        location TEXT NOT NULL,
+        date TEXT NOT NULL
       )
     ''');
 
@@ -140,8 +140,9 @@ class DatabaseHelper {
 
   // ---------------- REQUESTS ----------------
   Future<int> insertRequest(Map<String, dynamic> row) async {
-      print('$row');
       final db = await instance.database;
+      row['date'] = DateTime.now().toIso8601String();
+      print('$row');
       final result = await db.insert('requests', row);
       return result;
   }

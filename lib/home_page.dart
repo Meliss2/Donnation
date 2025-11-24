@@ -1,14 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'search_page.dart';
 import 'post_a_request.dart';
-// 🔹 Widget principal : HomePage
-class HomePage extends StatelessWidget {
-  final Map<String, dynamic>? userData; // ← ajouter ce paramètre
+import 'package:Donnation/database_helper.dart';
+import 'puplication_request.dart';
+
+class HomePage extends StatefulWidget {
+  final Map<String, dynamic>? userData;
   final void Function(int)? onNavigate;
 
   const HomePage({super.key, this.userData, this.onNavigate});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  List<Map<String, dynamic>> requests = [];
+  List<Map<String, dynamic>> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+    cleanOldRequests(); 
+    loadData();
+  }
+
+  Future<void> cleanOldRequests() async {
+    final db = DatabaseHelper.instance;
+    final database = await db.database;
+
+    await database.delete(
+      "requests",
+      where: "date < datetime('now', '-7 days')",
+    );
+  }
+
+  Future<void> loadData() async {
+    final db = DatabaseHelper.instance;
+    final database = await db.database;
+
+    final req = await database.query(
+      "requests",
+      orderBy: "date DESC", 
+    );
+
+    final usrs = await db.getAllUsers();
+
+    setState(() {
+      requests = req;
+      users = usrs;
+    });
+  }
+
+  String getUserName(int index) {
+    if (users.isEmpty) return "Unknown User";
+    return users[index % users.length]['fullName'];
+  }
+
+  String timeAgo(String dateString) {
+    final date = DateTime.tryParse(dateString);
+    if (date == null) return '';
+
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inSeconds < 60) return 'il y a ${diff.inSeconds} sec';
+    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'il y a ${diff.inHours} h';
+    if (diff.inDays < 7) return 'il y a ${diff.inDays} j';
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +78,19 @@ class HomePage extends StatelessWidget {
       backgroundColor: const Color(0xFFFFFEFE),
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, //  aligne tout à gauche
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 50),
-
-            //  logo
             Padding(
-              padding: const EdgeInsets.only(left: 25), //  espace depuis le bord gauche
+              padding: const EdgeInsets.only(left: 25),
               child: Image.asset(
                 'assets/LOGO2.png',
-                width: 220, //  taille augmentée
-                height: 80, //  un peu plus grand
+                width: 220,
+                height: 80,
                 fit: BoxFit.contain,
               ),
             ),
-
             const SizedBox(height: 20),
-
-            //  Section image
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 10),
               height: 190,
@@ -43,19 +100,16 @@ class HomePage extends StatelessWidget {
                   image: AssetImage('assets/slider1.png'),
                   fit: BoxFit.cover,
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
-                    color: const Color(0xFF474646),
+                    color: Color(0xFF474646),
                     blurRadius: 2,
-                    offset: const Offset(0, 3),
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
-// Deux boutons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -68,9 +122,9 @@ class HomePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PostRequestForm(), // 👈 bien FindDonorPage ici
+                          builder: (context) => PostRequestForm(),
                         ),
-                      );
+                      ).then((_) => loadData());
                     },
                   ),
                   RequestButton(
@@ -82,56 +136,57 @@ class HomePage extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => FindDonorPage(),
                         ),
-
                       );
                     },
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 0),
-
-            /// Section Donators
             Container(
               margin: const EdgeInsets.symmetric(vertical: 30),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
+              decoration: BoxDecoration(color: Colors.white),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Top Donators",
+                    "Requests",
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
-
                   ),
-                  const SizedBox(height: 16.0),
-                  DonatorItem(
-                    name: 'Ms.Sara',
-                    location: 'Maghnia, Tlemcen',
-                    bloodType: 'B+',
-                    imageAsset: 'assets/sara.png',
-                  ),
-                  const SizedBox(height: 16.0),
-                  DonatorItem(
-                    name: 'Mr.amine',
-                    location: 'Birkhadem, Alger',
-                    bloodType: 'O-',
-                    imageAsset: 'assets/amine.png',
-                  ),
-                  const SizedBox(height: 16.0),
-                  DonatorItem(
-                    name: 'Mr.Mohammed',
-                    location: 'El Khroub, Constantine',
-                    bloodType: 'A+',
-                    imageAsset: 'assets/mohamed.png',
-                  ),
+                  const SizedBox(height: 16),
+                  if (requests.isEmpty)
+                    Center(
+                      child: Text(
+                        "No requests yet",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ),
+                  for (int i = 0; i < requests.length; i++) ...[
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => RequestProfileSheet(
+                            request: requests[i],
+                            userName: getUserName(i),
+                          ),
+                        );
+                      },
+                      child: DonatorItem(
+                        name: getUserName(i),
+                        location: requests[i]['location'],
+                        bloodType: requests[i]['bloodGroup'],
+                        imageAsset: 'assets/profile.png',
+                        timeAgoText: timeAgo(requests[i]['date']),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ],
               ),
             ),
@@ -147,12 +202,14 @@ class DonatorItem extends StatelessWidget {
   final String location;
   final String bloodType;
   final String imageAsset;
+  final String? timeAgoText;
 
   DonatorItem({
     required this.name,
     required this.location,
     required this.bloodType,
     required this.imageAsset,
+    this.timeAgoText,
   });
 
   @override
@@ -166,73 +223,86 @@ class DonatorItem extends StatelessWidget {
           color: const Color(0xFFECE8E8),
           width: 2.0,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: const Color(0xFFAFAEAE),
+            color: Color(0xFFAFAEAE),
             blurRadius: 3,
-            offset: const Offset(0, 5),
+            offset: Offset(0, 5),
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: Image.asset(
-              imageAsset,
-              width: 48.0,
-              height: 48.0,
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(width: 16.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: Image.asset(
+                  imageAsset,
+                  width: 48.0,
+                  height: 48.0,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      location,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB31111),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: const Color(0xFFE5C5C5),
+                    width: 2.0,
+                  ),
+                ),
+                child: Text(
+                  bloodType,
                   style: const TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFFE5C5C5),
                   ),
                 ),
-                SizedBox(height: 4.0),
-                Text(
-                  location,
-                  style: const TextStyle(
-                    fontSize: 14.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFFB31111),
-              borderRadius: BorderRadius.circular(10.0),
-              border: Border.all(
-                color: const Color(0xFFE5C5C5),
-                width: 2.0,
               ),
-            ),
-            child: Text(
-              bloodType,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFE5C5C5),
-              ),
-            ),
+            ],
           ),
+          if (timeAgoText != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              timeAgoText!,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+          ],
         ],
       ),
     );
   }
 }
-// 🔸 Widget personnalisé pour les boutons Request / Donate
+
 class RequestButton extends StatelessWidget {
   final String title;
   final String image;
@@ -250,23 +320,22 @@ class RequestButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 170, // 🔹 plus large
-        height: 145, // 🔹 plus haut
+        width: 170,
+        height: 145,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: const Color(0xFFF6F1F1),
           borderRadius: BorderRadius.circular(18),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: const Color(0xFFF6E5E5),
+              color: Color(0xFFF6E5E5),
               blurRadius: 3,
-              offset: const Offset(0, 5),
+              offset: Offset(0, 5),
             ),
           ],
         ),
         child: Stack(
           children: [
-            //  Titre
             Positioned(
               left: 10,
               top: 8,
@@ -280,8 +349,6 @@ class RequestButton extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Flèche
             const Positioned(
               left: 8,
               bottom: 0,
@@ -291,28 +358,16 @@ class RequestButton extends StatelessWidget {
                 child: Icon(
                   Icons.arrow_forward,
                   color: Color(0xFF7A191A),
-                  fontWeight: FontWeight.bold,
                   size: 34,
                 ),
               ),
             ),
-
-            // Image
             Positioned(
               right: -12,
               bottom: -13,
-              child: Container(
+              child: SizedBox(
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFF6F1F1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
                 child: Padding(
                   padding: const EdgeInsets.all(6.0),
                   child: Image.asset(image, fit: BoxFit.contain),
