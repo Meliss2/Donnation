@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainPage()),
+        MaterialPageRoute(builder: (_) =>MainPage(userData: user)),
       );
     } else {
       // Email ou mot de passe incorrect
