@@ -1,1 +1,0 @@
-int fakeLoggedUserId = 1;

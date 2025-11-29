@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:Donnation/database_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
-import 'home_page.dart';
+import 'mainPage.dart';
 import 'package:intl/intl.dart'; // for formatting dates
 
 class SignUpPage extends StatefulWidget {
@@ -12,6 +13,48 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  final List<String> algeriaWilayas = [
+    "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa",
+    "Biskra", "Béchar", "Blida", "Bouira", "Tamanrasset", "Tébessa",
+    "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel",
+    "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba",
+    "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila",
+    "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj",
+    "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued",
+    "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla",
+    "Naâma", "Aïn Témouchent", "Ghardaïa", "Relizane",
+    "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal",
+    "Béni Abbès", "In Salah", "In Guezzam",
+    "Touggourt", "Djanet", "El M'Ghair", "El Meniaa"
+  ];
+
+
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
+
+  bool hasUpper = false;
+  bool hasNumber = false;
+  bool hasSpecial = false;
+  bool hasMinLength = false;
+
+  void checkPassword(String password) {
+    setState(() {
+      hasUpper = password.contains(RegExp(r'[A-Z]'));
+      hasNumber = password.contains(RegExp(r'[0-9]'));
+      hasSpecial = password.contains(RegExp(r'[@#$%^&*()_+=!?,.;:]'));
+      hasMinLength = password.length >= 8;
+    });
+  }
+
+
+  bool validatePassword(String password) {
+    if (password.length < 8) return false;
+    if (!password.contains(RegExp(r'[A-Z]'))) return false;
+    if (!password.contains(RegExp(r'[0-9]'))) return false;
+    if (!password.contains(RegExp(r'[@#$%^&*()_+=!?,.;:]'))) return false;
+    return true;
+  }
 
   // Controllers
   final TextEditingController _fullNameController = TextEditingController();
@@ -94,21 +137,27 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       if (result['success']) {
-        // Récupérer l'utilisateur depuis la DB
-        final insertedUser = await _dbHelper.getUserByEmail(userData['email']);
+        // Get full user object from DB
+        final Map<String, dynamic> insertedUser =
+        await _dbHelper.getUserByEmail(userData['email']) as Map<String, dynamic>;
 
-        // Afficher dans la console pour debug
         print('✅ User inserted successfully: $insertedUser');
+
+        // SAVE SESSION (same as login)
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('userId', insertedUser['id']);
+        await prefs.setBool('isLoggedIn', true);
+
+        // MARK USER LOGGED IN IN DATABASE
+        await DatabaseHelper.instance.markUserAsLoggedIn(insertedUser['id']);
 
         _showSuccess(result['message']);
         await Future.delayed(Duration(milliseconds: 1000));
 
-        // Aller vers HomePage en passant l'utilisateur
+        // Redirect to Main Page with user data
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => HomePage(userData: insertedUser),
-          ),
+          MaterialPageRoute(builder: (_) => MainPage(userData: insertedUser)),
         );
       }
       else {
@@ -285,7 +334,8 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(height: 24),
               _buildSectionTitle('Address *'),
               SizedBox(height: 8),
-              _buildTextField(_addressController, 'Enter your Address'),
+              _buildAddressDropdown(),
+
 
               SizedBox(height: 24),
               _buildSectionTitle('Email *'),
@@ -372,6 +422,35 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  Widget _buildAddressDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[400]!),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: _addressController.text.isEmpty ? null : _addressController.text,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+          border: InputBorder.none,
+        ),
+        hint: Text("Select your Wilaya"),
+        items: algeriaWilayas
+            .map((wilaya) => DropdownMenuItem(
+          value: wilaya,
+          child: Text(wilaya),
+        ))
+            .toList(),
+        onChanged: (value) {
+          setState(() {
+            _addressController.text = value!;
+          });
+        },
+        validator: (val) => val == null ? 'Please select your Wilaya' : null,
+      ),
+    );
+  }
+
   Widget _buildEmailField() {
     return _buildTextField(
       _emailController,
@@ -385,35 +464,105 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildPhoneField() {
-    return _buildTextField(
-      _phoneController,
-      'Enter your Phone',
-      validator: (val) {
-        if (val == null || val.isEmpty) return 'Phone is required';
-        if (!RegExp(r'^\d{10,15}$').hasMatch(val)) return 'Enter a valid phone number';
-        return null;
-      },
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[400]!),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: TextFormField(
+        controller: _phoneController,
+        keyboardType: TextInputType.number,     // ⬅ numbers keyboard
+        decoration: InputDecoration(
+          hintText: 'Enter your Phone',
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          border: InputBorder.none,
+        ),
+        validator: (val) {
+          if (val == null || val.isEmpty) return 'Phone is required';
+          if (!RegExp(r'^\d{10}$').hasMatch(val)) return 'Enter a valid 10-digit phone number';
+          return null;
+        },
+      ),
     );
   }
+
+
+  Widget _passwordRules() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ruleItem("At least 1 uppercase letter", hasUpper),
+        _ruleItem("At least 1 number", hasNumber),
+        _ruleItem("At least 1 special character", hasSpecial),
+        _ruleItem("Minimum 8 characters", hasMinLength),
+      ],
+    );
+  }
+
+  Widget _ruleItem(String text, bool isValid) {
+    return Row(
+      children: [
+        Icon(
+          isValid ? Icons.check_circle : Icons.cancel,
+          color: isValid ? Colors.green : Colors.red,
+          size: 18,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            color: isValid ? Colors.green : Colors.red,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    );
+  }
+
 
   Widget _buildPasswordField() {
-    return _buildTextField(
-      _passwordController,
-      'Enter your Password',
-      isPassword: true,
-      validator: (val) {
-        if (val == null || val.isEmpty) return 'Password is required';
-        if (val.length < 6) return 'Password must be at least 6 characters';
-        return null;
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _passwordController,
+          obscureText: !_showPassword,
+          onChanged: (value) => checkPassword(value),
+          decoration: InputDecoration(
+            labelText: 'Enter your Password',
+            suffixIcon: IconButton(
+              icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => _showPassword = !_showPassword),
+            ),
+            border: OutlineInputBorder(),
+          ),
+          validator: (val) {
+            if (val == null || val.isEmpty) return 'Password is required';
+            if (!(hasUpper && hasNumber && hasSpecial && hasMinLength)) {
+              return 'Password does not meet requirements';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 8),
+        _passwordRules(),
+      ],
     );
   }
 
+
   Widget _buildConfirmPasswordField() {
-    return _buildTextField(
-      _confirmPasswordController,
-      'Confirm Password',
-      isPassword: true,
+    return TextFormField(
+      controller: _confirmPasswordController,
+      obscureText: !_showConfirmPassword,
+      decoration: InputDecoration(
+        labelText: 'Confirm Password',
+        border: OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(_showConfirmPassword ? Icons.visibility : Icons.visibility_off),
+          onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+        ),
+      ),
       validator: (val) {
         if (val == null || val.isEmpty) return 'Please confirm your password';
         if (val != _passwordController.text) return 'Passwords do not match';
@@ -421,6 +570,7 @@ class _SignUpPageState extends State<SignUpPage> {
       },
     );
   }
+
 
   Widget _buildHealthConditionRadio() {
     return Row(

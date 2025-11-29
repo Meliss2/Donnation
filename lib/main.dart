@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Donat Algeria',
+      title: 'DonAlgeria',
       home: const SplashScreen(),
     );
   }

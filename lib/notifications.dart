@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'globals.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -10,6 +9,7 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  final int fakeLoggedUserId = 1;
   List<Map<String, dynamic>> notifications = [];
 
   @override

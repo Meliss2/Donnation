@@ -74,7 +74,8 @@ class DatabaseHelper {
         phone TEXT NOT NULL,
         password TEXT NOT NULL,
         healthCondition TEXT NOT NULL,
-        isLoggedIn INTEGER DEFAULT 0
+        isLoggedIn INTEGER DEFAULT 0,
+        profileImage TEXT
       )
     ''');
   }
@@ -108,6 +109,28 @@ class DatabaseHelper {
     final id = await insertUser(userData);
     return {'success': true, 'message': 'Inscription réussie', 'userId': id};
   }
+
+  // Update user profile (name, phone, address, email, etc.)
+  Future<void> updateUserProfile(int userId, Map<String, dynamic> updatedData) async {
+    final db = await instance.database;
+    await db.update(
+      'users',
+      updatedData,
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
+  Future<void> updateUserProfileImage(int userId, String imagePath) async {
+    final db = await instance.database;
+    await db.update(
+      'users',
+      {'profileImage': imagePath},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
+
 
   Future<Map<String, dynamic>?> loginUser(String email, String password) async {
     final db = await instance.database;
