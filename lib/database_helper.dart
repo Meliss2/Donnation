@@ -19,29 +19,44 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
+    // Optionnel : supprimer la base existante pour repartir à zéro (en dev seulement)
+    // await deleteDatabase(path);
+
     return await openDatabase(
       path,
       version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade, // <-- ne pas oublier
     );
   }
+
+// Fonction de migration
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Ajoute la colonne userId si elle n'existe pas
+      await db.execute(
+          'ALTER TABLE requests ADD COLUMN userId INTEGER DEFAULT NULL'
+      );
+    }
+  }
+
 
 
   Future _createDB(Database db, int version) async {
     // Requests
     await db.execute('''
       CREATE TABLE requests(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        userId INTEGER NOT NULL,
-        name TEXT NOT NULL,
-        age TEXT NOT NULL,
-        gender TEXT NOT NULL,
-        needType TEXT NOT NULL,
-        bloodGroup TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        location TEXT NOT NULL,
-        date TEXT NOT NULL,
-        FOREIGN KEY (userId) REFERENCES users(id)
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          age TEXT NOT NULL,
+          gender TEXT NOT NULL,
+          needType TEXT NOT NULL,
+          bloodGroup TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          location TEXT NOT NULL,
+          date TEXT NOT NULL,
+          FOREIGN KEY (userId) REFERENCES users(id)
       )
     ''');
 
@@ -226,6 +241,7 @@ class DatabaseHelper {
       'timestamp': DateTime.now().toIso8601String(),
     });
   }
+
   Future close() async {
     final db = await instance.database;
     await db.close();
